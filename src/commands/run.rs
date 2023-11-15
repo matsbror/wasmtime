@@ -10,7 +10,11 @@ use crate::common::{Profile, RunCommon, RunTarget};
 use anyhow::{anyhow, bail, Context as _, Error, Result};
 use clap::Parser;
 use std::ffi::OsString;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::env;
+use std::time::SystemTime;
 use std::sync::Arc;
 use std::thread;
 use wasmtime::{Engine, Func, Module, Store, StoreLimits, Val, ValType};
@@ -112,6 +116,46 @@ impl RunCommand {
     /// Executes the command.
     pub fn execute(mut self) -> Result<()> {
         self.run.common.init_logging()?;
+
+        // find out which benchmark we are running
+        let bmark = match env::var("WABENCHMARK") {
+            Ok(s) => s,
+            Err(_) => String::from("unknown"),
+        };
+
+        // find out os_architecture
+        let hosttype = match env::var("HOSTTYPE") {
+            Ok(s) => s,
+            Err(_) => String::from("unknown"),
+        };
+
+        let ts = match SystemTime::now().duration_since(SystemTime::UNIX_EPOCH) {
+            Ok(n) => n.as_micros(),
+            Err(_) => panic!("Cannot get timestamp"),
+        };
+
+        let filename = env::var("WABENCH_FILE");
+        match filename {
+            Ok(f) => {
+                let mut file = OpenOptions::new()
+                    .create(true)
+                    .write(true)
+                    .append(true)
+                    .open(f)
+                    .unwrap();
+                write!(
+                    file,
+                    "{}, wasmtime, {}, starting, timestamp, {}\n",
+                    hosttype, bmark, ts
+                )?;
+            }
+            Err(_) => {
+                println!(
+                    "{}, wasmtime, {}, starting, timestamp, {}",
+                    hosttype, bmark, ts
+                );
+            }
+        };
 
         let mut config = self.run.common.config(None)?;
 
@@ -880,7 +924,7 @@ fn write_core_dump(
     path: &str,
 ) -> Result<()> {
     use std::fs::File;
-    use std::io::Write;
+    // use std::io::Write;
 
     let core_dump = err
         .downcast_ref::<wasmtime::WasmCoreDump>()
