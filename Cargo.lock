@@ -4302,6 +4302,7 @@ dependencies = [
  "wasmtime-test-macros",
  "wasmtime-test-util",
  "wasmtime-wasi",
+ "wasmtime-wasi-acc",
  "wasmtime-wasi-config",
  "wasmtime-wasi-http",
  "wasmtime-wasi-keyvalue",
@@ -4686,6 +4687,17 @@ dependencies = [
  "wasmtime-wasi-io",
  "wiggle",
  "windows-sys 0.59.0",
+]
+
+[[package]]
+name = "wasmtime-wasi-acc"
+version = "35.0.0"
+dependencies = [
+ "anyhow",
+ "test-programs-artifacts",
+ "tokio",
+ "wasmtime",
+ "wasmtime-wasi",
 ]
 
 [[package]]
