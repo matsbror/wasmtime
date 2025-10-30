@@ -201,6 +201,8 @@ impl ServeCommand {
             wasi_keyvalue: None,
             #[cfg(feature = "wasi-accelerator")]
             wasi_accelerator: None,
+            #[cfg(feature = "wasi-dataframe")]
+            wasi_dataframe: None,
             #[cfg(feature = "profiling")]
             guest_profiler: None,
         };
